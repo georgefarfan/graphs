@@ -1,0 +1,19 @@
+
+.graph {
+    display: flex;
+    flex-direction: row;
+ 
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.info {
+    width: 50%;
+}
+
+canvas { 
+    width: 50%;
+    height: 100%;
+    background: white;
+    border: 1px solid black;
+}
