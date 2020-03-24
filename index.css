@@ -11,9 +11,12 @@
     width: 50%;
 }
 
-canvas { 
+.bar-lines {
     width: 50%;
-    height: 100%;
+}
+canvas { 
+
+ 
     background: white;
     border: 1px solid black;
 }

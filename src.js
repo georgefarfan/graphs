@@ -1,69 +1,146 @@
 const canvas = document.getElementById("myCanvas");
-const ctx = canvas.getContext("2d");
-ctx.scale(2,2);
+const ctx = canvas.getContext("2d"); 
+//ctx.scale(2,2);
 const days = [ 
-              {day:1, mega:"5Mb"},
-              {day:2, mega:"10Mb"},
-              {day:3, mega:"25Mb"},
-              {day:4, mega:"10Mb"},
-              {day:5, mega:"10Mb"},
-              {day:6, mega:"50Mb"},
-              {day:7, mega:"100Mb"},
-              {day:8, mega:"50Mb"},
-              {day:9, mega:"5Mb"},
-              {day:10, mega:"50Mb"},
-              {day:11, mega:"10Mb"},
-              {day:12, mega:"25Mb"},
-              {day:13, mega:"5Mb"},
-              {day:14, mega:"5Mb"},
-              {day:15, mega:"10Mb"},
-              {day:16, mega:"25Mb"},
-              {day:17, mega:"10Mb"},
-              {day:18, mega:"10Mb"},
-              {day:19, mega:"50Mb"},
-              {day:20, mega:"100Mb"},
-			  {day:21, mega:"50Mb"},
-              {day:22, mega:"10Mb"},
-              {day:23, mega:"25Mb"},
-              {day:24, mega:"5Mb"},
-              {day:25, mega:"5Mb"},
-              {day:26, mega:"10Mb"},
-              {day:27, mega:"25Mb"},
-              {day:28, mega:"10Mb"},
-              {day:29, mega:"10Mb"},
-              {day:30, mega:"50Mb"}
+              {day:1,  type: 'day',mega:"5Mb"},
+              {day:'13 hs',  type: 'time',mega:"10Mb"},
+              {day:'15 hs',  type: 'time',mega:"25Mb"},
+              {day:'16 hs',  type: 'time',mega:"10Mb"},
+              {day:'20 hs',  type: 'time',mega:"10Mb"},
+              {day:6,  type: 'day',mega:"50Mb"},
+              {day:'10 hs',  type: 'time',mega:"100Mb"},
+              {day:'13 hs',  type: 'time',mega:"50Mb"},
+              {day:'18 hs',  type: 'time',mega:"5Mb"},
+              {day:'19 hs', type: 'time', mega:"50Mb"},
+              {day:'20 hs', type: 'time', mega:"10Mb"},
+              {day:12, type: 'day', mega:"25Mb"},
+              {day:'9 hs', type: 'time', mega:"5Mb"},
+              {day:'11 hs', type: 'time', mega:"5Mb"},
+              {day:'13 hs', type: 'time', mega:"10Mb"},
+              {day:'16 hs', type: 'time', mega:"25Mb"},
+              {day:17, type: 'day', mega:"10Mb"},
+              {day:'8:30 hs', type: 'time', mega:"10Mb"},
+              {day:'10:30 hs', type: 'time', mega:"50Mb"},
+              {day:'17:30 hs', type: 'time', mega:"100Mb"},
+			        {day:21, type: 'day', mega:"50Mb"},
+              {day:'11:30 hs', type: 'time', mega:"10Mb"},
+              {day:'13:30 hs', type: 'time', mega:"25Mb"},
+              {day:'20:30 hs', type: 'time', mega:"5Mb"},
+              {day:'22:30 hs', type: 'time', mega:"5Mb"},
+              {day:26, type: 'day', mega:"10Mb"},
+              {day:'8:30 hs', type: 'time', mega:"25Mb"},
+              {day:'11:30 hs', type: 'time', mega:"10Mb"},
+              {day:'22:30 hs', type: 'time', mega:"10Mb"},
+              {day:'23:30 hs', type: 'time', mega:"50Mb"},
+   
               ];
 const megas = ['100Mb', '50Mb', '25Mb', '10Mb', '5Mb'];
-const width = 600;
-let separate = 40;
-let lineForMegas = []
+let lineForMegas = [];
+const separateInc = ((1200 - 40)/ days.length) - 20;
+let DAYS_DOTS = [];
 
-// Draw Days
-days.forEach(DAY => {
-  ctx.font='bold 10px Arial';
-	ctx.fillText(DAY.day, separate ,300);
-  separate += 18;
-})
 
-//Draw megas
 
-let separateY = 25;
-megas.forEach(MEGA => {
-	ctx.font = "bold 10px Arial ";
-	ctx.fillText(MEGA, 5 , separateY);
-  lineForMegas.push({
-    mega: MEGA,
-    pos: {
-    	x: 42,
-      y: separateY
-    }
-  });
-  separateY += 50;
-})
+CanvasRenderingContext2D.prototype.dotTooltip = function () {
+  return this;
+}
 
-drawLinesGraph();
-drawMegaLines();
-drawBarLine();
+CanvasRenderingContext2D.prototype.dotRounded = function () {
+  return this;
+}
+
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+  if (w < 2 * r) r = w / 2;
+  if (h < 2 * r) r = h / 2;
+  this.beginPath();
+  this.moveTo(x+r, y);
+  this.arcTo(x+w, y,   x+w, y+h, r);
+  this.arcTo(x+w, y+h, x,   y+h, r);
+  this.arcTo(x,   y+h, x,   y,   r);
+  this.arcTo(x,   y,   x+w, y,   r);
+  this.closePath();
+  return this;
+}
+
+// Draw all Graph and components
+drawGraph();
+
+
+canvas.addEventListener('mousemove', function(e) {
+  let x = e.pageX - canvas.offsetLeft;
+  let y = e.pageY - canvas.offsetTop;
+ 
+  let selectedDayDot = searchDayDot(x, y);
+  if(selectedDayDot) {
+    drawGraph();
+    createTooltip(selectedDayDot.day.mega, selectedDayDot.pos_x.rad_x1, selectedDayDot.pos_y.rad_y1)
+  } else {
+    drawGraph();
+  }
+}, 0);
+
+function createTooltip(text, posX, posY) {
+  ctx.fillStyle = '#ddd';
+  //or .fill() for a filled rect
+  ctx.roundRect(posX - 20, posY - 20, 80, 40, 10).fill(); 
+
+  // Title
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 10px verdana';
+  ctx.fillText(text,  posX - 10 , posY );
+
+  // Description
+
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 10px verdana';
+  ctx.fillText(text,  posX - 10 , posY +10);
+}
+
+function drawGraph() {
+  resetGraph();
+  drawDayAxisX()
+  drawMegasAxixY();
+  drawLinesGraph();
+  drawMegaLines();
+  drawBarLine();
+}
+
+function resetGraph() {
+  DAYS_DOTS = [];
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, 1200, 640)
+  
+}
+
+function drawMegasAxixY() {
+    //Draw megas
+    let separateY = 25;
+    megas.forEach(MEGA => {
+      ctx.fillStyle = "black";
+      ctx.font = "bold 10px Arial ";
+      ctx.fillText(MEGA, 5 , separateY);
+      lineForMegas.push({
+        mega: MEGA,
+        pos: {
+          x: 42,
+          y: separateY
+        }
+      });
+      separateY += 50;
+    })
+}
+
+function drawDayAxisX() {
+    // Draw Days
+    let separate = 40;
+    days.forEach(DAY => {
+      ctx.fillStyle = DAY.type === 'day' ? 'black' : 'grey';
+      ctx.font= DAY.type === 'day' ? 'bold 10px Arial' : '10px Arial';
+      let text = DAY.type === 'day' ? DAY.day : '' ;
+      ctx.fillText(text, separate ,300);
+      separate += separateInc;
+    })
+}
 
 function drawBarLine() {
   let posXBarLine = 45;
@@ -74,8 +151,8 @@ function drawBarLine() {
     		let nextMega = searchPosYMegas(days[pos+1].mega);
     		drawLine(posXBarLine, selectedMega, nextMega);
     }
-    drawDot(posXBarLine, selectedMega.pos.y);
-    posXBarLine += 18;
+    drawDot(DAY,posXBarLine, selectedMega.pos.y);
+    posXBarLine += separateInc;
     pos+=1;
   })
 }
@@ -83,8 +160,18 @@ function drawBarLine() {
 function drawLine(posXBarLine,previousMega, nextMega) {
     ctx.beginPath();
     ctx.moveTo(posXBarLine, previousMega.pos.y);
-    ctx.lineTo(posXBarLine+18, nextMega.pos.y);
-    ctx.lineWidth = 1;
+    let nextMegaValue = Number(nextMega.mega.split('M')[0]) ;
+    let prevMegaValue = Number(previousMega.mega.split('M')[0]);
+    if( nextMegaValue === prevMegaValue) {
+      ctx.lineTo(posXBarLine+separateInc, nextMega.pos.y);
+    } else {
+      if (nextMegaValue > prevMegaValue) {
+        ctx.bezierCurveTo(posXBarLine+separateInc- 5, nextMega.pos.y, posXBarLine+separateInc  , nextMega.pos.y, posXBarLine+separateInc, nextMega.pos.y);  
+      } else {
+        ctx.bezierCurveTo(posXBarLine+separateInc - 5, nextMega.pos.y - 40   , posXBarLine+separateInc , nextMega.pos.y, posXBarLine+separateInc, nextMega.pos.y);  
+      }
+    }
+    ctx.lineWidth = 1.5;
     ctx.strokeStyle = '#28d9e1';
     ctx.stroke();  
 }
@@ -115,7 +202,18 @@ function drawMegaLines() {
   })
 }
 
-function drawDot(posX, posY) {
+function drawDot(day, posX, posY) {
+  DAYS_DOTS.push({
+    pos_x : {
+      rad_x1: Math.round(posX-5),
+      rad_x2: Math.round(posX+5),
+    },
+    pos_y : {
+      rad_y1: Math.round(posY-10),
+      rad_y2: Math.round(posY+10),
+    },
+    day: day
+  });
   ctx.beginPath();
   ctx.arc(posX,posY, 3,10, 0, Math.PI * 2);
   ctx.strokeStyle = '#74ace5';
@@ -125,10 +223,9 @@ function drawDot(posX, posY) {
   ctx.closePath();
 }
 
-
-
-
- 
-
-
-
+function searchDayDot(posX, posY) {
+  return DAYS_DOTS.find(dayDot => 
+   (posX >= dayDot.pos_x.rad_x1  && posX <= dayDot.pos_x.rad_x2  ) &&
+   (posY >= dayDot.pos_y.rad_y1  && posY <= dayDot.pos_y.rad_y2  )
+ );
+}
